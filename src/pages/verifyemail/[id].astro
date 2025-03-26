@@ -1,0 +1,119 @@
+---
+const { id } = Astro.params;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verificación de Email</title>
+    <style>
+      .modal {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(110, 110, 110, 0.5);
+      }
+      .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        text-align: center;
+      }
+      .success-message {
+        color: green;
+      }
+      .hidden {
+        display: none;
+      }
+      .failure-message {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+  <div class="modal">
+    <div class="modal-content">
+      <div class="text-center">
+        <img
+            class="max-w-xl mx-auto mb-3 max-md:max-w-full"
+            src="/images/logo.png"
+            alt="Empleo Emprende"
+        />
+      </div>
+      <h2 class="font-bold mb-3 text-xl">
+        Please verify your email address
+      </h2>
+      <p class="mb-3">
+        Simply click the button below to complete your verification
+      </p>
+      <!-- Success Message -->
+      <div id="success-message" class="success-message hidden">
+        Your email has been successfully verified!
+      </div>
+
+      <!-- Failure Message -->
+      <div id="failure-message" class="failure-message hidden">
+        Verification failed, please try again later.
+      </div>
+
+      <!-- Verify Button -->
+      <button
+          data-id={id}
+          class="button-verify p-2 mb-2 border rounded-md text-white bg-blue-400"
+          onclick="verifyUserEmail()">Verify Email</button>
+    </div>
+  </div>
+  </body>
+</html>
+
+<script>
+  import { environment } from "../../environment/environment";
+  const showError = document.getElementById("failure-message");
+  const showSuccess = document.getElementById("success-message");
+  const buttonVerify = document.querySelector(".button-verify");
+
+  function verifyUserEmail() {
+    fetch(
+      `${environment.baseUrl}/subscriptions-api/subscription/${userId}/confirmation`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      }
+    )
+      .then((res) => {
+        if (!res.ok) {
+          error = true;
+
+          showError && showError.classList.toggle("hidden");
+        }
+      })
+      .catch(() => {
+        error = true;
+
+        showError && showError.classList.toggle("hidden");
+      })
+      .finally(() => {
+        if (!error) {
+          success = true;
+
+          showSuccess && showSuccess.classList.toggle("hidden");
+          buttonVerify && buttonVerify.classList.toggle("hidden");
+        }
+      });
+  }
+
+  const button: any = document.querySelector(".button-verify");
+  button.addEventListener("click", verifyUserEmail);
+  const userId = button.dataset.id;
+  let error = false;
+  let success = false;
+</script>

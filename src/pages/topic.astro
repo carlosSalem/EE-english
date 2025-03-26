@@ -1,0 +1,163 @@
+---
+import SocialRecent from "../components/social-recent.astro";
+import MainLayout from "../layout/main-layout.astro";
+
+import { environment } from "../environment/environment";
+import type { Post } from "../models/post.model";
+let currentPage = 0;
+let pageSize = 4;
+const name = Astro.url.searchParams.get("name") || "";
+
+const topics: any = [];
+
+if (name) {
+  await getPostsByTopic(currentPage, pageSize, name.toUpperCase());
+}
+async function getPostsByTopic(page: number, size: number, topic: string) {
+  const response = await fetch(
+    `${environment.baseUrl}/posts-api/posts/topic/${topic}?page=${page}&size=${size}`,
+  );
+  const data = await response.json();
+  const postsData = data.content;
+  if (postsData) {
+    postsData.forEach((post: Post) => {
+      // Create HTML string for post
+      const postHTML = `
+        <div class="col-span-6 mt-4 max-sm:col-span-12">
+            <a href="/${post.slug}" rel="follow">
+                <div class="post-container">
+              <div class="image-container rounded-md mb-3">
+                <img class="post--image rounded-md max-w-full h-[188px] w-full object-cover" src="${post.image?.url}" alt="${post.image?.alt}" />
+              </div>
+              <a href="/${post.slug}" class="text-xl font-bold mb-3 mt-3">${post.title}</a>
+              <div class="detail flex justify-between text-gray-400 text-sm mt-2">
+                <div>${post.topic}</div>
+                <div>${post.creationTime?.substring(0, 10)}</div>
+              </div>
+            </div>
+            </a>
+          </div>
+          `;
+
+      // Append postHTML to postContainer
+      topics.push(postHTML);
+    });
+  }
+}
+---
+
+<style>
+  h2 {
+    @apply font-bold mb-5 relative after:w-12 after:h-[3px] after:bg-blue-400 after:-bottom-2 after:absolute after:left-0;
+  }
+</style>
+<MainLayout>
+  <div class="max-w-6xl mx-auto p-3">
+    <div class="bread-crumbs mb-5 mt-2">
+      <div class="flex gap-3 text-sm text-gray-500">
+        <div class="flex items-center">
+          <span class="mr-2">
+            <svg
+                class="w-4 fill-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 576 512"
+            ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+              <path
+                  d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"
+              ></path></svg
+            >
+          </span>
+          <span> Inicio </span>
+          <span class="ml-2"
+          ><svg
+              class="w-2 fill-gray-600"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 320 512"
+          ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+              <path
+                  d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+              ></path></svg
+          ></span
+          >
+        </div>
+        <div>
+          <span class="bread-crumb--title">{name}</span>
+        </div>
+      </div>
+    </div>
+    <h2 class="my-4 topic--name text-4xl uppercase">{name}</h2>
+    <div class="grid grid-cols-12 gap-4">
+      <div class="col-span-8 max-md:col-span-12">
+        <div class="grid grid-cols-12 gap-4 posts mt-3" set:html={topics} />
+        <div class="text-center">
+          <button
+              class="btn load-more-btn mt-12 bg-blue-400 text-white px-7 py-3 rounded-md"
+          >Leer mas</button
+          >
+        </div>
+      </div>
+      <div class="col-span-4 max-md:col-span-12">
+        <SocialRecent />
+      </div>
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  import { environment } from "../environment/environment";
+  import type { Post } from "../models/post.model";
+  const posts: any = document.querySelector(".posts");
+  let currentPage = 0;
+  let pageSize = 4;
+
+  const loadMoreBtn: any = document.querySelector(".load-more-btn");
+
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const params = Object.fromEntries(urlSearchParams.entries());
+  //console.log("params", params);
+  const breadCrumbTitle: any = document.querySelector(".bread-crumb--title");
+  breadCrumbTitle.textContent = params.name;
+  const heading: any = document.querySelector("h2");
+  heading.textContent = params.name;
+  if (params.name) {
+    getPostsByTopic(currentPage, pageSize, params.name.toUpperCase());
+  }
+  async function getPostsByTopic(page: number, size: number, topic: string) {
+    const response = await fetch(
+      `${environment.baseUrl}/posts-api/posts/topic/${topic}?page=${page}&size=${size}`,
+    );
+    const data = await response.json();
+    //console.log(data);
+    const postsData = data.content;
+    //console.log(postsData);
+    if (postsData) {
+      postsData.forEach((post: Post) => {
+        // Create HTML string for post
+        const postHTML = `
+        <div class="col-span-6 mt-4 max-sm:col-span-12">
+            <a href="/${post.slug}" rel="follow">
+                <div class="post-container">
+              <div class="image-container rounded-md mb-3">
+                <img class="post--image rounded-md max-w-full h-[188px] w-full object-cover" src="${post.image?.url}" alt="${post.image?.alt}" />
+              </div>
+              <a href="/${post.slug}" class="text-xl font-bold mb-3 mt-3">${post.title}</a>
+              <div class="detail flex justify-between text-gray-400 text-sm mt-2">
+                <div>${post.topic}</div>
+                <div>${post.creationTime?.substring(0, 10)}</div>
+              </div>
+            </div>
+            </a>
+          </div>
+          `;
+
+        // Append postHTML to postContainer
+        posts.innerHTML += postHTML;
+      });
+      currentPage++;
+    }
+  }
+  loadMoreBtn.addEventListener("click", () => {
+    // console.log(currentPage, pageSize, params.name.toUpperCase());
+    getPostsByTopic(currentPage, pageSize, params.name.toUpperCase());
+  });
+</script>

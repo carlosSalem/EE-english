@@ -1,0 +1,54 @@
+---
+import Topbar from "./topbar.astro";
+import Navbar from "./navbar.astro";
+import Newsletter from "../components/newsletter.astro";
+import Footer from "./footer.astro";
+import CookieConsent from "../components/cookie-consent.astro";
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8"/>
+    <script is:inline
+      type="text/partytown"
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-5DN7RYCK15"></script>
+    <script is:inline type="text/partytown">
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
+      if (localStorage.getItem('googleAnalyticsConsent') === 'true') {
+          gtag("js", new Date());
+          gtag("config", "G-5DN7RYCK15");
+        }
+        
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonicalURL} />
+  </head>
+
+  <body>
+    <h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;">Employment and entrepreneurship portal</h1>
+    <main>
+      <Topbar />
+      <Navbar />
+      <!-- different routes here -->
+      <slot />
+      <Newsletter />
+      <Footer />
+      <CookieConsent />
+    </main>
+  </body>
+</html>

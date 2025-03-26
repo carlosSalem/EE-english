@@ -1,0 +1,351 @@
+---
+import "../styles/global.css";
+
+import SocialRecent from "../components/social-recent.astro";
+import { environment } from "../environment/environment";
+import MainLayout from "../layout/main-layout.astro";
+import { errorPost } from "./404.astro";
+
+// Obtiene todos los slugs de los posts desde la API
+export async function getAllSlugs() {
+  const response = await fetch(`${environment.baseUrl}/posts-api/posts/slugs`);
+  const posts = await response.json();
+  const slugs = posts.content.map((value: any) => value.slug);
+
+  // Asume que los posts tienen una propiedad `slug`
+  return slugs;
+}
+export async function updateVisitsById(postId: string) {
+  await fetch(`${environment.baseUrl}/posts-api/post/${postId}/visits`, {
+    method: "PATCH",
+    body: JSON.stringify({}),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8",
+    },
+  });
+}
+// Implementa getStaticPaths para generar las rutas
+export async function getStaticPaths() {
+  const slugs = await getAllSlugs();
+
+  return slugs.map((slug: string) => ({
+    params: { slug },
+  }));
+}
+
+export async function getPostBySlug(slug: string) {
+  const response = await fetch(
+    `${environment.baseUrl}/posts-api/post/slug/${slug}`,
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const post = await response.json();
+
+  // Asume que la respuesta contiene el contenido del post
+  return post;
+}
+
+function decodeHtmlEntities(str) {
+  const entityMap = {
+    "&lt;": "<",
+    "&gt;": ">",
+    "&amp;": "&",
+    "&quot;": '"',
+    "&apos;": "'",
+    "&nbsp;": " ", // Replace &nbsp; with a normal space
+  };
+
+  return str.replace(/&lt;|&gt;|&amp;|&quot;|&apos;|&nbsp;/g, function (match) {
+    return entityMap[match];
+  });
+}
+
+const { slug } = Astro.params;
+const { href } = Astro.url;
+var post = await getPostBySlug(slug);
+
+if (!post) {
+  // Create just an error Post object to tell the user that this post is not available
+  post = errorPost
+}
+
+if (post && post.id) {
+  await updateVisitsById(post.id);
+}
+---
+
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    {
+      post && post.creationTime && (
+        <meta name="date" content={post.creationTime.substring(0, 10)} />
+      )
+    }
+    {
+      post && post.updateTime && (
+        <meta name="revised" content={post.updateTime.substring(0, 10)} />
+      )
+    }
+    {
+      post &&
+        post.meta &&
+        Object.entries(post.meta).map((meta: any) => (
+          <meta name={meta[0]} content={meta[1].join(" ")} />
+        ))
+    }
+    {
+      post && post.image && post.image.url && (
+        <meta property="og:image" content={post.image.url} />
+      )
+    }
+    {post && <meta property="og:type" content="article" />}
+    {post && <meta property="og:url" content={href} />}
+    {post && <meta property="og:title" content={post.title} />}
+    {
+      post && (
+        <meta property="og:description" content={post.meta.description || ""} />
+      )
+    }
+    {post && <meta name="twitter:card" content="photo" />}
+    {post && <meta name="twitter:title" content={post.title} />}
+    {
+      post && (
+        <meta
+          name="twitter:description"
+          content={post.meta.description || ""}
+        />
+      )
+    }
+    {post && <meta name="twitter:url" content={href} />}
+    {
+      post && post.image && post.image.url && (
+        <meta name="twitter:image" content={post.image.url} />
+      )
+    }
+
+    <title>{slug}</title>
+  </head>
+
+  <MainLayout>
+    <div
+      class="container max-w-6xl mx-auto p-3"
+      style="font-family: 'Roboto Slab', serif "
+    >
+      <div class="bread-crumbs mb-5">
+        <div class="flex gap-3 text-sm text-gray-500">
+          <div class="flex items-center gap-2">
+            <span
+              ><svg
+                class="w-4 fill-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 576 512"
+                ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                <path
+                  d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"
+                ></path></svg
+              ></span
+            >
+            <span>Inicio</span>
+            <span
+              ><svg
+                class="w-2 fill-gray-600"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 320 512"
+                ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                <path
+                  d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+                ></path></svg
+              ></span
+            >
+          </div>
+          <div class="flex gap-2 items-center">
+            <span class="bread-crumb--topic">{post && post.topic}</span>
+            <span
+              ><svg
+                class="w-2 fill-gray-600"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 320 512"
+                ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                <path
+                  d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+                ></path></svg
+              ></span
+            >
+          </div>
+          <div>
+            <span class="bread-crumb--title line-clamp-2"
+              >{post && post.title}</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-12 gap-3">
+        <article class="col-span-8 max-md:col-span-12">
+          <h1 class="post--title text-4xl font-bold">{post && post.title}</h1>
+
+          <h2 class="mt-3 post--sentence font-semibold text-xl">
+            {post && post.sentence}
+          </h2>
+          <div class="mt-3 flex gap-6 items-center flex-wrap">
+            <div class="logo flex items-center gap-2">
+              <img
+                class="w-10 h-10"
+                src="/images/EE2.png"
+                alt="empleo emprende"
+              />
+              <div class="text-xs font-semibold text-gray-600">
+                Empleo Emprende
+              </div>
+            </div>
+            <div class="flex gap-1 items-center">
+              <i
+                ><svg
+                  class="w-3 fill-gray-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 512 512"
+                  ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                  <path
+                    d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"
+                  ></path></svg
+                ></i
+              >
+              <time
+                datetime={post && post.creationTime}
+                class="post--creationTime text-xs text-gray-600"
+                >{
+                  post && post.creationTime?.substring(0, 16).replace("T", " ")
+                }</time
+              >
+            </div>
+            <div class="text-xs text-gray-600">
+              <div class="flex gap-1 items-center">
+                <i
+                  ><svg
+                    class="w-2 fill-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 384 512"
+                    ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                    <path
+                      d="M153.6 29.9l16-21.3C173.6 3.2 180 0 186.7 0C198.4 0 208 9.6 208 21.3V43.5c0 13.1 5.4 25.7 14.9 34.7L307.6 159C356.4 205.6 384 270.2 384 337.7C384 434 306 512 209.7 512H192C86 512 0 426 0 320v-3.8c0-48.8 19.4-95.6 53.9-130.1l3.5-3.5c4.2-4.2 10-6.6 16-6.6C85.9 176 96 186.1 96 198.6V288c0 35.3 28.7 64 64 64s64-28.7 64-64v-3.9c0-18-7.2-35.3-19.9-48l-38.6-38.6c-24-24-37.5-56.7-37.5-90.7c0-27.7 9-54.8 25.6-76.9z"
+                    ></path></svg
+                  ></i
+                >
+                <span class="text-sm post--visits">{post && post.visits}</span>
+              </div>
+            </div>
+            <div class="text-sm flex gap-1 items-center text-gray-600">
+              <i
+                ><svg
+                  class="w-3 fill-gray-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 576 512"
+                  ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                  <path
+                    d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"
+                  ></path></svg
+                ></i
+              >
+              <span class="post--time">{Math.random() < 0.5 ? 2.5 : 3}</span>
+              <span>minutos</span>
+            </div>
+          </div>
+          <div class="mt-4 mb-4">
+            {
+              post && post.image && post.image.url && (
+                <img
+                  class="post--image rounded-md"
+                  src={post.image.url}
+                  alt={post.image.alt}
+                />
+              )
+            }
+          </div>
+          <div
+            class="dynamic-content post--body"
+            set:html={post && post.body && decodeHtmlEntities(post.body)}
+          />
+
+          <div class="btn__container">
+            <a href="" target="_blank" class="btn-w group" rel="nofollow">
+              <i class="fa-brands">
+                <svg
+                  class="fill-green-400 w-5 group-hover:fill-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 448 512"
+                  ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                  <path
+                    d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"
+                  ></path></svg
+                >
+              </i>
+              <span>Comparte</span>
+            </a>
+            <a href="" target="_blank" class="btn-f group" rel="nofollow">
+              <i class="fa-brands"
+                ><svg
+                  class="fill-blue-400 w-3 group-hover:fill-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 320 512"
+                  ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                  <path
+                    d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"
+                  ></path></svg
+                ></i
+              >
+              <span>Comparte</span>
+            </a>
+          </div>
+        </article>
+        <div class="col-span-4 max-md:col-span-12">
+          <SocialRecent />
+        </div>
+      </div>
+    </div>
+  </MainLayout>
+
+  <script>
+    import { environment } from "../environment/environment";
+    const urlSearchParams = new URLSearchParams(window.location.pathname);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    export async function getPostBySlug(slug) {
+      const response = await fetch(
+        `${environment.baseUrl}/posts-api/post/slug/${slug}`,
+      );
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const post = await response.json();
+
+      // Asume que la respuesta contiene el contenido del post
+      return post;
+    }
+
+    // Accede al parámetro de la ruta
+    const slug = Object.keys(params)[0].split("/")[1];
+    // Obtén los datos del artículo usando el slug
+    const post = await getPostBySlug(slug);
+
+    if (!post) {
+      throw new Error(`Post not found for slug: ${slug}`);
+    }
+
+    if (post) {
+      const whatsappBtn: any = document.querySelector(".btn-w");
+      const facebookBtn: any = document.querySelector(".btn-f");
+      whatsappBtn.setAttribute(
+        "href",
+        `https://wa.me/?text=${encodeURI(window.location.href)}`,
+      );
+      facebookBtn.setAttribute(
+        "href",
+        `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`,
+      );
+    }
+  </script>
+</html>

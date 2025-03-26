@@ -1,0 +1,36 @@
+---
+import { environment } from "../environment/environment";
+let slug;
+let firstTitle;
+async function getLatestPosts(page: number, size: number) {
+  const response = await fetch(
+      `${environment.baseUrl}/posts-api/posts/filter?page=${page}&size=${size}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sort: "NONE",
+          direction: "DESC",
+          topics: [],
+        }),
+      },
+  );
+  const data = await response.json();
+  firstTitle = data.content[0].title;
+  slug = data.content[0].slug;
+}
+await getLatestPosts(0, 4);
+---
+
+<div class="border-b hidden sm:block">
+  <div class="container max-w-6xl mx-auto">
+    <div class="flex px-4 justify-between items-center">
+      <div class="news-today flex gap-4 items-center">
+        <div class="bg-blue-400 p-2.5 text-white">Today's News</div>
+        <a href={`/${slug}`} class="text-blue-400 topbar--title">{firstTitle}</a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+---
+import { environment } from "../environment/environment";
+import { type Post } from "../models/post.model";
+const postRendered: any = [];
+async function getAllPosts(page: number, size: number) {
+  try {
+    const response = await fetch(
+      `${environment.baseUrl}/posts-api/posts?page=${page}&size=${size}`,
+    );
+    const data = await response.json();
+    const postsData = data.content;
+    if (postsData) {
+      postsData.forEach((post: Post) => {
+        // Create HTML string for post
+        const postHTML = `
+          <div class="grid grid-cols-12 py-1">
+            <div class="col-span-10"><a href="${post.slug}" class='text-blue-400 font-semibold'>${post.title}</a></div>
+            <div class="col-span-2 font-semibold">${post.creationTime}</div>
+            
+            </div>
+            `;
+        postRendered.push(postHTML);
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+await getAllPosts(0, 180);
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+
+  <div class="px-4 mt-4">
+    <h1 class="font-bold text-3xl mb-3">Site News Map</h1>
+    <div class="heading grid grid-cols-12 font-semibold text-gray-500">
+      <div class="col-span-10">Title</div>
+      <div class="col-span-2">Publication Date</div>
+    </div>
+    <hr />
+    <div class="posts-container" set:html={postRendered} />
+  </div>
+
+  <script></script>
+
+
+</html>

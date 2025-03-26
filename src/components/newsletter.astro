@@ -1,0 +1,159 @@
+---
+
+---
+
+<div class="bg-gradient-to-r from-[#35a8e0] to-[#e63a32] py-10 my-10">
+  <div class="container max-w-6xl mx-auto px-3">
+    <div class="flex justify-between items-center max-sm:flex-col">
+      <div class="title-info">
+        <div class="font-bold text-2xl text-white mb-6">
+          Subscribe to Our Blog
+        </div>
+        <div class="text-white max-w-xl">
+          Subscribe to our newsletter and be the first to receive new content, updates, and articles tailored to your interests.
+        </div>
+      </div>
+      <div class="max-sm:mt-8">
+        <button
+            class="open-newsletter--btn text-white bg-black rounded-md px-10 py-3 font-medium uppercase text-sm"
+        >Subscribe</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+    class="newsletter-overlay scale-0 opacity-0 transition-all duration-300 bg-black/80 fixed bottom-0 top-0 left-0 right-0 z-20"
+>
+  <div
+      class="bg-white max-w-lg min-w-80 absolute z-20 left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 py-4 px-5 rounded-md"
+  >
+    <div class="logo">
+      <img src="/images/logo.png" alt="EmpleoEmprende.es" />
+    </div>
+    <div class="font-bold text-xl text-center mt-1 mb-3">
+      Subscribe to Our Newsletter
+    </div>
+    <hr />
+    <div class="text-center text-sm p-2">
+      Want to stay updated with the latest trends, opportunities, and advice in the world of employment and entrepreneurship? Subscribe to our newsletter and receive valuable content directly in your inbox.
+    </div>
+    <div class="my-2">
+      <input
+          class="email--input rounded-full border border-gray-300 w-full px-4 py-2 focus:border-blue-400 focus:border outline-none"
+          type="email"
+          placeholder="Your email"
+      />
+      <p class="incorrect-email--msg hidden text-red-500 px-1 my-2">
+        A valid email is required
+      </p>
+      <p class="send-email--msg hidden text-blue-500 px-1 my-2">
+        Check your email!
+      </p>
+    </div>
+    <div class="my-2 flex items-center px-2">
+      <input type="checkbox" id="policy" name="policy" class="policy--input" />
+      <label for="policy" class="text-sm ml-2"
+      >I have read and accept the <a
+          href="privacy-policy"
+          rel="nofollow"
+          class="text-blue-400">Privacy Policy.</a></label>
+    </div>
+    <p class="incorrect-checkbox--msg hidden text-red-500 px-1 my-2">
+      You must accept the privacy policy
+    </p>
+    <hr />
+    <div class="w-full mt-3 flex items-center justify-end">
+      <button
+          class="newsletter-back--btn px-6 py-2 mb-2 border rounded-md text-white font-bold bg-gray-900"
+      >BACK</button>
+      <button
+          class="newsletter-subscribe--btn ml-2 px-6 py-2 mb-2 border rounded-md text-white bg-blue-400 font-bold"
+      >SUBSCRIBE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { environment } from "../environment/environment";
+
+  const newsletterBackBtn: any = document.querySelector(
+    ".newsletter-back--btn",
+  );
+  const newsletterSubscribeBtn: any = document.querySelector(
+    ".newsletter-subscribe--btn",
+  );
+  const newsletterOverlay: any = document.querySelector(".newsletter-overlay");
+
+  const openNewsletterBtn: any = document.querySelector(
+    ".open-newsletter--btn",
+  );
+
+  const emailInput: any = document.querySelector(".email--input");
+  const policyInput: any = document.querySelector(".policy--input");
+
+  const incorrectEmailMessage: any = document.querySelector(
+    ".incorrect-email--msg",
+  );
+  const sendEmailMessage: any = document.querySelector(".send-email--msg");
+  const incorrectCheckboxMessage: any = document.querySelector(
+    ".incorrect-checkbox--msg",
+  );
+
+  openNewsletterBtn &&
+    openNewsletterBtn.addEventListener("click", openNewsletterDialog);
+
+  function openNewsletterDialog() {
+    newsletterOverlay.classList.remove("scale-0");
+    newsletterOverlay.classList.remove("opacity-0");
+  }
+
+  //close modal
+  newsletterBackBtn &&
+    newsletterBackBtn.addEventListener("click", closeNewsletterDialog);
+  function closeNewsletterDialog() {
+    newsletterOverlay.classList.add("scale-0");
+    newsletterOverlay.classList.add("opacity-0");
+    incorrectEmailMessage.classList.remove("block");
+    incorrectEmailMessage.classList.add("hidden");
+    incorrectCheckboxMessage.classList.remove("block");
+    incorrectCheckboxMessage.classList.add("hidden");
+  }
+
+  newsletterSubscribeBtn &&
+    newsletterSubscribeBtn.addEventListener("click", subscribeToNewsletter);
+
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function subscribeToNewsletter() {
+    const emailValue = emailInput.value;
+
+    if (emailValue.match(re) == null) {
+      //validation enter a valid email
+      incorrectEmailMessage.classList.add("block");
+      incorrectEmailMessage.classList.remove("hidden");
+      return;
+    } else {
+      if (policyInput.checked == false) {
+        incorrectCheckboxMessage.classList.add("block");
+        incorrectCheckboxMessage.classList.remove("hidden");
+        return;
+      }
+      fetch(`${environment.baseUrl}/subscriptions-api/subscription`, {
+        method: "POST",
+        body: JSON.stringify({
+          email: emailValue,
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      }).then((res) => {
+        // console.log(res);
+      });
+      sendEmailMessage.classList.add("block");
+      sendEmailMessage.classList.remove("hidden");
+      setTimeout(() => {
+        closeNewsletterDialog();
+      }, 3000);
+    }
+  }
+</script>

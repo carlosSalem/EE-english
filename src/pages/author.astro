@@ -1,0 +1,127 @@
+---
+import MainLayout from "../layout/main-layout.astro";
+---
+
+<MainLayout>
+  <div class="container max-w-6xl mx-auto px-3">
+    <div class="bread-crumbs mt-5">
+      <div class="flex gap-3 text-sm text-gray-500">
+        <div class="flex items-center gap-2">
+          <span>
+            <svg
+                class="w-4 fill-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 576 512"
+            >
+              <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+              <path
+                  d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"
+              ></path>
+            </svg>
+          </span>
+          <span>Home</span>
+          <span>
+            <svg
+                class="w-2 fill-gray-600"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 320 512"
+            >
+              <!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+              <path
+                  d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"
+              ></path>
+            </svg>
+          </span>
+        </div>
+        <div>
+          <span>Team</span>
+        </div>
+      </div>
+    </div>
+    <section class="main-content pt-0">
+      <h2
+          class="font-extrabold my-3 text-3xl uppercase mb-5 relative after:w-12 after:h-0.5 after:bg-blue-400 after:-bottom-1 after:absolute after:left-0"
+      >
+        Our Team
+      </h2>
+      <div
+          style="font-family: 'Roboto Slab' serif;"
+          class="author-container max-w-3xl"
+      >
+        <div class="author-card max-sm:flex-col flex gap-5 my-14">
+          <div>
+            <img
+                class="min-w-20 h-20 rounded-md max-w-full"
+                src="/images/carlos-bouadi-padilla.png"
+                alt="Carlos Bouadi Padilla"
+            />
+          </div>
+          <div class="author-info space-y-3">
+            <div class="name font-bold">Carlos Bouadi Padilla</div>
+            <div class="job">Editor</div>
+            <div class="details">
+              Expert in web design and front-end programming. Passionate about creating
+              attractive and functional digital experiences. Focused on providing value
+              to entrepreneurs and in career development and SEO.
+            </div>
+          </div>
+        </div>
+        <div class="author-card max-sm:flex-col flex gap-5 my-14">
+          <div>
+            <img
+                class="min-w-20 h-20 rounded-md max-w-full"
+                src="/images/miguel.jpeg"
+                alt="Miguel Rodríguez Salas"
+            />
+          </div>
+          <div class="author-info space-y-3">
+            <div class="name font-bold">Miguel Rodríguez Salas</div>
+            <div class="job">Graphic Designer</div>
+            <div class="details">
+              Creative and passionate graphic designer with advanced skills in Adobe
+              Creative Suite and Sketch. My experience in logo design, visual identity,
+              web and mobile design, and typography has allowed me to create impactful
+              and effective designs for each project.
+            </div>
+          </div>
+        </div>
+        <div class="author-card max-sm:flex-col flex gap-5 my-14">
+          <div>
+            <img
+                class="min-w-20 h-20 rounded-md max-w-full"
+                src="/images/jose-lara-gomez.png"
+                alt="Jose Lara Gomez"
+            />
+          </div>
+          <div class="author-info space-y-3">
+            <div class="name font-bold">Jose Lara Gomez</div>
+            <div class="job">Backend Developer</div>
+            <div class="details">
+              Expert back-end developer in software architecture. Focused on building
+              scalable and efficient systems. Driving technological innovation behind
+              every project.
+            </div>
+          </div>
+        </div>
+        <div class="author-card max-sm:flex-col flex gap-5 my-14">
+          <div>
+            <img
+                class="min-w-20 h-20 rounded-md max-w-full"
+                src="/images/celia-silva-balzer.png"
+                alt="Celia Silva-Balzer"
+            />
+          </div>
+          <div class="author-info space-y-3">
+            <div class="name font-bold">Celia Silva-Balzer</div>
+            <div class="job">Writer</div>
+            <div class="details">
+              Writer specialized in employment and labor topics. Committed to reporting
+              accurately and timely. Passionate narrator of trends and news in the
+              professional world.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</MainLayout>

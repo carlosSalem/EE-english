@@ -1,0 +1,889 @@
+---
+import SocialRecent from "../components/social-recent.astro";
+import MainLayout from "../layout/main-layout.astro";
+
+import { environment } from "../environment/environment";
+import type { Post } from "../models/post.model";
+
+const featured: any = [];
+const popular: any = [];
+const latest: any = [];
+const random: any = [];
+const veryLatest: any = [];
+let hotTopics: any;
+const TOPICS = ["EMPRENDIMIENTO", "DESARROLLO LABORAL"];
+
+async function getFeaturedPosts(page: number, size: number) {
+  try {
+    const response = await fetch(
+      `${environment.baseUrl}/posts-api/posts/filter?page=${page}&size=${size}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sort: "NONE",
+          direction: "DESC",
+          topics: TOPICS,
+        }),
+      }
+    );
+    const { content } = await response.json();
+    featured.push(...content.slice(0, 3));
+  } catch (error) {
+    console.log(error);
+  }
+}
+await getFeaturedPosts(0, 3);
+//Popular posts
+async function getPopularPosts(page: number, size: number) {
+  try {
+    const response = await fetch(
+      `${environment.baseUrl}/posts-api/posts/filter?page=${page}&size=${size}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sort: "MORE_VISITS",
+          direction: "DESC",
+          topics: TOPICS,
+        }),
+      },
+    );
+
+    const { content } = await response.json();
+    const [first, second, third] = content;
+    popular.push(first, second, third);
+  } catch (error) {
+    console.log(error);
+  }
+}
+await getPopularPosts(0, 3);
+
+// latest / recent
+async function getLatestPosts(page: number, size: number) {
+  try {
+    const response = await fetch(
+      `${environment.baseUrl}/posts-api/posts/filter?page=${page}&size=${size}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sort: "NONE",
+          direction: "DESC",
+          topics: [],
+        }),
+      },
+    );
+    const { content } = await response.json();
+
+    const [first, second, third, fourth] = content;
+    latest.push(first, second, third, fourth);
+  } catch (error) {
+    console.log(error);
+  }
+}
+await getLatestPosts(0, 4);
+//Random Posts//
+let allPosts: Post[] = [];
+let randomPosts: Post[] = [];
+
+let oneRandomPostHotTopic: Post[] = [];
+async function getAllPosts(page: number, size: number) {
+  try {
+    const response = await fetch(
+      `${environment.baseUrl}/posts-api/posts/filter?page=${page}&size=${size}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sort: "NONE",
+          direction: "DESC",
+          topics: ["EMPRENDIMIENTO", "DESARROLLO LABORAL"],
+        }),
+      },
+    );
+    const data = await response.json();
+    allPosts = data.content;
+    const randomIndexes = getRandomIndexes(10);
+    randomIndexes.forEach((index) => random.push(allPosts[index]));
+
+    const oneRandomIndex = getRandomIndexes(1)[0];
+    hotTopics = allPosts[oneRandomIndex];
+  } catch (error) {
+    console.log(error);
+  }
+}
+await getAllPosts(0, 55);
+function getRandomIndexes(count: number): number[] {
+  count = Math.min(count, allPosts.length);
+
+  const indexes = Array.from({ length: allPosts.length }, (_, index) => index);
+  // Shuffle the array of indexes
+  for (let i = indexes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+  }
+  // Return the first 'count' indexes
+  return indexes.slice(0, count);
+}
+
+//Grid Latest + load more
+const latestPost: any = [];
+async function loadGridLatestPosts(page: number, size: number) {
+  const response = await fetch(
+    `${environment.baseUrl}/posts-api/posts/filter?page=${page}&size=${size}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sort: "MORE_VISITS",
+        direction: "DESC",
+        topics: TOPICS,
+      }),
+    },
+  );
+
+  const data = await response.json();
+  const postsData = data.content;
+  if (postsData) {
+    postsData.forEach((post: Post) => {
+      // Create HTML string for post
+      const postHTML = `
+        
+         <div class="col-span-6 max-md:col-span-12">
+          <a href="/${post.slug}">
+            <div class="post-container">
+              <div class="image-container rounded-md mb-3">
+                <img class="post--image rounded-md max-w-full h-[250px] w-full object-cover" src="${post.image?.url}" alt="${post.image?.alt}" />
+                </div>
+                <a href="/${post.slug}" class="text-xl font-bold mb-3 mt-3">${post.title}</a>
+                <div class="detail flex justify-between text-gray-400 text-sm mt-2">
+                  <div>${post.topic}</div>
+                  <div>${post.creationTime?.substring(0, 10)}</div>
+                 </div>
+              </div>
+            </a>
+          </div>
+                
+                    `;
+
+      // Append postHTML to postContainer
+      latestPost.push(postHTML);
+    });
+  }
+}
+await loadGridLatestPosts(0, 4);
+
+latest.forEach((post: Post) => {
+  const postHTML = `
+         <div class="col-span-6 max-md:col-span-12">
+          <a href="/${post.slug}">
+            <div class="post-container">
+              <div class="image-container rounded-md mb-3">
+                <img class="post--image rounded-md max-w-full h-[250px] w-full object-cover" src="${post.image?.url}" alt="${post.image?.alt}" />
+                </div>
+                <a href="/${post.slug}" class="text-xl font-bold mb-3 mt-3">${post.title}</a>
+                <div class="detail flex justify-between text-gray-400 text-sm mt-2">
+                  <div>${post.topic}</div>
+                  <div>${post.creationTime?.substring(0, 10)}</div>
+                 </div>
+              </div>
+            </a>
+          </div>
+                
+                    `;
+
+  veryLatest.push(postHTML);
+});
+---
+
+<head>
+  <title>Empleo Emprende</title>
+  <meta charset="UTF-8" />
+  <meta
+      name="description"
+      content="News, articles and guides about employment, job search, career development, entrepreneurship and business. Find job opportunities, job offers, interview tips, business creation and more."
+  />
+  <meta
+      name="keywords"
+      content="employment, jobs, job offers, career, entrepreneurship, business, startups, job search, Spain jobs, work in Spain"
+  />
+</head>
+
+<style>
+  img {
+    border-radius: 6px;
+  }
+  h2 {
+    @apply font-bold mb-5 relative after:w-12 after:h-0.5 after:bg-blue-400 after:-bottom-1 after:absolute after:left-0;
+  }
+  /*//TODO: set post-container on all */
+  .post-container {
+    overflow: hidden;
+  }
+  img {
+    transition: 0.3s;
+  }
+  img:hover {
+    scale: 1.1;
+    overflow: hidden;
+  }
+</style>
+<MainLayout>
+  <div class="container max-w-6xl mx-auto px-3 mt-8 min-h-[60vh]">
+    <div class="grid grid-cols-12 gap-4">
+      <div class="col-span-7 max-lg:col-span-6 max-md:col-span-12">
+        <div class="post-container relative">
+          <a href={`/${featured[0].slug}`}>
+            <img
+              class="w-full h-[230px] md:min-h-[600px] feature-post-1--image object-cover"
+              src={featured[0].image.url}
+              alt={featured[0].image.alt}
+            />
+          </a>
+          <div
+            class="feature-post-1--topic absolute uppercase top-4 left-4 px-2 py-1 rounded-md bg-blue-400 text-white text-[8px] cursor-pointer hover:text-black"
+          >
+            {featured[0].topic}
+          </div>
+          <div class="post-content absolute bottom-4 left-4 p-3">
+            <div class="post-title text-white">
+              <a
+                href={`/${featured[0].slug}`}
+                class="feature-post-1--title max-md:line-clamp-1 font-bold text-4xl max-md:text-2xl mb-2"
+              >{featured[0].title}</a>
+              <div class="detail flex text-sm mt-3">
+                <div class="author flex">
+                  <div>
+                    <img src="" alt="" />
+                  </div>
+                  <div class="author-name"></div>
+                </div>
+                <div class="date-container flex gap-1">
+                  <div>
+                    <img src="" alt="" />
+                  </div>
+                  <div class="date feature-post-1--creationTime">
+                    {featured[0].creationTime?.substring(0, 10)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-span-5 max-lg:col-span-6 max-md:col-span-12">
+        <div class="grid grid-cols-12 gap-3">
+          <div
+            class="col-span-12 post-container max-md:col-span-6 max-sm:col-span-12 relative mb-4"
+          >
+            <a href={`/${featured[1].slug}`}>
+              <img
+                class="w-full h-full min-h-[230px] md:min-h-[250px] feature-post-2--image object-cover"
+                src={featured[1].image.url}
+                alt={featured[1].image.alt}
+              />
+            </a>
+            <div
+              class="feature-post-2--topic post-category uppercase absolute top-4 left-4 px-2 py-1 rounded-md bg-blue-400 text-white text-[8px] cursor-pointer hover:text-black"
+            >
+              {featured[1].topic}
+            </div>
+            <div class="post-content absolute bottom-4 left-4 p-3">
+              <div class="post-title text-white">
+                <a
+                  href={`/${featured[1].slug}`}
+                  class="font-bold feature-post-2--title max-md:line-clamp-1 text-2xl max-md:text-xl mb-2"
+                >{featured[1].title}</a>
+                <div class="detail flex text-sm mt-3">
+                  <div class="author flex">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="author-name"></div>
+                  </div>
+                  <div class="date-container flex gap-1">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="date feature-post-2--creationTime">
+                      {featured[1].creationTime?.substring(0, 10)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="post-container col-span-12 max-md:col-span-6 max-sm:col-span-12 relative"
+          >
+            <a href={`/${featured[2].slug}`}>
+              <img
+                class="w-full min-h-[230px] md:min-h-[250px] feature-post-3--image"
+                src={featured[2].image.url}
+                alt={featured[2].image.alt}
+              />
+            </a>
+            <div
+              class="post-category uppercase feature-post-3--topic absolute top-4 left-4 px-2 py-1 rounded-md bg-blue-400 text-white text-[8px] cursor-pointer hover:text-black"
+            >
+              {featured[2].topic}
+            </div>
+            <div class="post-content absolute bottom-4 left-4 p-3">
+              <div class="post-title text-white">
+                <a
+                  href={`/${featured[2].slug}`}
+                  class="font-bold feature-post-3--title max-md:line-clamp-1 text-2xl max-md:text-xl mb-2"
+                >{featured[2].title}</a>
+                <div class="detail flex text-sm mt-3">
+                  <div class="author flex">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="author-name"></div>
+                  </div>
+                  <div class="date-container flex gap-1">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="date feature-post-3--creationTime">
+                      {featured[2].creationTime?.substring(0, 10)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container max-w-6xl mx-auto px-3 mt-8">
+    <!-- Popular -->
+    <div class="popular grid grid-cols-12 gap-6 mt-12">
+      <div class="col-span-8 max-lg:col-span-12">
+        <h2>Popular esta semana</h2>
+        <div class="grid grid-cols-12 gap-4">
+          <div class="col-span-6 max-md:col-span-12">
+            <div class="post-container relative">
+              <a href={`/${popular[0].slug}`}>
+                <img
+                  class="w-full max-h-[190px] popular-post-1--image"
+                  src={popular[0].image.url}
+                  alt={popular[0].image.alt}
+                />
+              </a>
+              <div
+                class="post-category popular-post-1--topic uppercase absolute top-4 left-4 px-2 py-1 rounded-md bg-blue-400 text-white text-[8px] cursor-pointer hover:text-black"
+              >
+                {popular[0].topic}
+              </div>
+              <div class="post-title text-slate-800 mt-3">
+                <a
+                  href={`/${popular[0].slug}`}
+                  class="font-bold text-xl mb-2 popular-post-1--title line-clamp-1"
+                  >{popular[0].title}</a
+                >
+                <div class="detail flex text-sm text-gray-400 mt-3">
+                  <div class="author flex">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="author-name"></div>
+                  </div>
+                  <div class="date-container flex gap-1">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="date popular-post-1--creationTime">
+                      {popular[0].creationTime?.substring(0, 10)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-6 space-y-3 max-md:col-span-12">
+            <div class="small-post flex gap-3">
+              <div class="w-[135px] h-[85px]">
+                {
+                  popular[1].image && (
+                  <a href={`/${popular[1].slug}`}>
+                    <img
+                      class="min-w-[135px] h-full popular-post-2--image"
+                      src={popular[1].image.url}
+                      alt={popular[1].image.alt}
+                    />
+                    </a>
+                  )
+                }
+              </div>
+              <div class="post-detail-small space-y-2">
+                <div
+                  class="category popular-post-2--topic text-blue-400 text-sm font-semibold"
+                >
+                  {popular[1].topic}
+                </div>
+                <div class="title font-semibold line-clamp-2">
+                  <a
+                    href={`/${popular[1].slug}`}
+                    rel="follow"
+                    class="popular-post-2--title"
+                  >
+                    {popular[1].title}</a
+                  >
+                </div>
+                <div class="date text-gray-400 popular-post-2--creationTime">
+                  {popular[1].creationTime?.substring(0, 10)}
+                </div>
+              </div>
+            </div>
+            <div class="small-post flex gap-3">
+              <div class="w-[135px] h-[85px]">
+                {
+                  popular[2].image && (
+                  <a href={`/${popular[2].slug}`}>
+                    <img
+                      class="min-w-[135px] h-full popular-post-3--image"
+                      src={popular[2].image.url}
+                      alt={popular[2].image.alt}
+                    />
+                  </a>  
+                  )
+                }
+              </div>
+              <div class="post-detail-small space-y-2">
+                <div
+                  class="category popular-post-3--topic text-blue-400 text-sm font-semibold"
+                >
+                  {popular[2].topic}
+                </div>
+                <div class="title font-semibold line-clamp-2">
+                  <a href={`/${popular[2].slug}`} class="popular-post-3--title"
+                    >{popular[2].title}</a
+                  >
+                </div>
+                <div class="date text-gray-400 popular-post-3--creationTime">
+                  {popular[2].creationTime?.substring(0, 10)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="most-read grid grid-cols-12 gap-3 mt-12">
+          <div class="col-span-6 max-md:col-span-12 mt-5">
+            <h2>Lo más leido</h2>
+            <div class="post-container relative">
+              <a href={`/${popular[0].slug}`}>
+              <img
+                class="w-full max-h-[190px] most-read-1--image"
+                src={popular[0].image.url}
+                alt={popular[0].image.alt}
+              />
+            </a>
+              <div
+                class="post-category most-read-1--topic uppercase absolute top-4 left-4 px-2 py-1 rounded-md bg-blue-400 text-white text-[8px] cursor-pointer hover:text-black"
+              >
+                {popular[0].topic}
+              </div>
+              <div class="post-title text-slate-800 mt-3">
+                <a
+                  href={`/${popular[0].slug}`}
+                  class="font-bold text-xl mb-2 most-read-1--title line-clamp-1"
+                >
+                  {popular[0].title}</a
+                >
+                <div class="detail flex text-sm text-gray-400 mt-3">
+                  <div class="author flex">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="author-name"></div>
+                  </div>
+                  <div class="date-container flex gap-1">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="date most-read-1--creationTime">
+                      {popular[0].creationTime?.substring(0, 10)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-6 max-md:col-span-12 mt-5">
+            <h2>Hot Topics</h2>
+            <div class="post-container relative">
+              <a href={`/${hotTopics.slug}`}></a>
+              <img
+                class="w-full max-h-[190px] hottopic-post-1--image"
+                src={hotTopics.image?.url}
+                alt={hotTopics.image?.alt}
+              />
+              </a>  
+              <div
+                class="post-category hottopic-post-1--topic uppercase absolute top-4 left-4 px-2 py-1 rounded-md bg-blue-400 text-white text-[8px] cursor-pointer hover:text-black"
+              >
+                {hotTopics.topic}
+              </div>
+              <div class="post-title text-slate-800 mt-3">
+                <a
+                  href={`/${hotTopics.slug}`}
+                  class="font-bold text-xl mb-2 hottopic-post-1--title line-clamp-1"
+                >
+                  {hotTopics.title}</a
+                >
+                <div class="detail flex text-sm text-gray-400 mt-3">
+                  <div class="author flex">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="author-name"></div>
+                  </div>
+                  <div class="date-container flex gap-1">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="date hottopic-post-1--creationTime">
+                      {hotTopics.creationTime?.substring(0, 10)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- the latest -->
+        <div class="col-span-12 mt-10">
+          <h2>Reciente</h2>
+          <div
+            class="small-post flex gap-3 items-center mb-8 max-md:flex-col max-md:items-start"
+          >
+            <div class="w-[350px] h-[190px] max-md:w-full relative">
+              {
+                latest && latest[0] && (
+                <a href={`/${latest[0].slug}`}>
+                  <img
+                    class="md:min-w-[350px] h-full latest-post-1--image"
+                    src={latest[0].image.url}
+                    alt={latest[0].image.alt}
+                  />
+                  </a>
+                )
+              }
+              <div
+                class="post-category latest-post-1--topic uppercase absolute top-4 left-4 px-2 py-1 rounded-md bg-blue-400 text-white text-[8px] cursor-pointer hover:text-black"
+              >
+                {latest[0].topic}
+              </div>
+            </div>
+            <div class="post-detail-small space-y-1">
+              <div class="title text-xl font-bold">
+                <a href={`/${latest[0].slug}`} class="latest-post-1--title"
+                  >{latest[0].title}</a
+                >
+              </div>
+              <div class="author-name text-gray-400"></div>
+              <div class="date text-gray-400 latest-post-1--creationTime">
+                {latest[0].creationTime?.substring(0, 10)}
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-6 mb-3 max-md:col-span-12">
+              <div class="small-post flex gap-3">
+                <div class="w-[135px] h-[85px]">
+                  <a href={`/${latest[2].slug}`}></a>
+                  <img
+                    class="min-w-[135px] h-full latest-post-2--image"
+                    src={latest[2].image.url}
+                    alt={latest[2].image.alt}
+                  />
+                </a>
+                </div>
+                <div class="post-detail-small space-y-1">
+                  <div
+                    class="category latest-post-2--topic font-semibold text-blue-400 text-sm"
+                  >
+                    {latest[2].topic}
+                  </div>
+                  <div class="title text-base font-semibold text-slate-800">
+                    <a
+                      href={`/${latest[2].slug}`}
+                      class="latest-post-2--title line-clamp-2"
+                    >
+                      {latest[2].title}</a
+                    >
+                  </div>
+                  <div
+                    class="date text-gray-400 text-sm latest-post-2--creationTime"
+                  >
+                    {latest[2].creationTime?.substring(0, 10)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-span-6 mb-3 max-md:col-span-12">
+              <div class="small-post flex gap-3">
+                <div class="w-[135px] h-[85px]">
+                  <a href={`/${latest[3].slug}`}></a>
+                  <img
+                    class="min-w-[135px] h-full latest-post-3--image"
+                    src={latest[3].image.url}
+                    alt={latest[3].image.alt}
+                  />
+                </a>
+                </div>
+                <div class="post-detail-small space-y-1">
+                  <div
+                    class="category font-semibold latest-post-3--topic text-blue-400 text-sm"
+                  >
+                    {latest[3].topic}
+                  </div>
+                  <div class="title text-base font-semibold text-slate-800">
+                    <a
+                      href={`/${latest[3].slug}`}
+                      class="latest-post-3--title line-clamp-2"
+                      >{latest[3].title}</a
+                    >
+                  </div>
+                  <div
+                    class="date text-gray-400 text-sm latest-post-3--creationTime"
+                  >
+                    {latest[3].creationTime?.substring(0, 10)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-span-4 max-lg:col-span-12">
+        <SocialRecent />
+      </div>
+    </div>
+    <div class="grid grid-cols-12 gap-6">
+      <!-- Dont miss -->
+      <div class="col-span-8 mt-5 max-md:col-span-12">
+        <h2>NO TE PIERDAS</h2>
+        <div class="grid grid-cols-12 gap-4">
+          <div class="col-span-6 max-md:col-span-12">
+            <div class="post-container relative">
+              <a href={`/${random[0].slug}`}>
+              <img
+                class="w-full max-h-[190px] dontmiss-post-1--image"
+                src={random[0].image.url}
+                alt={random[0].image.alt}
+              />
+            </a>
+              <div
+                class="post-category dontmiss-post-1--topic uppercase absolute top-4 left-4 px-2 py-1 rounded-md bg-blue-400 text-white text-[8px] cursor-pointer hover:text-black"
+              >
+                {random[0].topic}
+              </div>
+              <div class="post-title text-slate-800 mt-3">
+                <a
+                  href={`/${random[0].slug}`}
+                  class="font-bold text-xl mb-2 dontmiss-post-1--title"
+                  >{random[0].title}</a
+                >
+                <div class="detail flex text-sm text-gray-400 mt-3">
+                  <div class="author flex">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="author-name"></div>
+                  </div>
+                  <div class="date-container flex gap-1">
+                    <div>
+                      <img src="" alt="" />
+                    </div>
+                    <div class="date dontmiss-post-1--creationTime">
+                      {random[0].creationTime?.substring(0, 10)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- small posts -->
+          <div class="col-span-6 max-md:col-span-12">
+            <div class="grid grid-cols-12 gap-3">
+              <div class="col-span-6 mb-3 max-sm:col-span-12">
+                <div class="post-container relative">
+                  <a href={`/${random[1].slug}`}>
+                  <img
+                    class="w-[200px] h-[85px] object-cover dontmiss-post-2--image"
+                    src={random[1].image.url}
+                    alt={random[1].image.alt}
+                  />
+                  </a>
+                  <div class="post-title text-slate-800 mt-3">
+                    <a
+                      href={`/${random[1].slug}`}
+                      class="font-bold text-base mb-1 line-clamp-2 dontmiss-post-2--title"
+                      >{random[1].title}</a
+                    >
+                    <div class="detail flex text-sm text-gray-400 mt-2">
+                      <div class="date-container flex gap-1">
+                        <div>
+                          <img src="" alt="" />
+                        </div>
+                        <div class="date dontmiss-post-2--creationTime">
+                          {random[1].creationTime?.substring(0, 10)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-span-6 mb-3 max-sm:col-span-12">
+                <div class="post-container relative">
+                  <a href={`/${random[2].slug}`}>
+                  <img
+                    class="w-[200px] h-[85px] object-cover dontmiss-post-3--image"
+                    src={random[2].image.url}
+                    alt={random[2].image.alt}
+                  />
+                  </a>    
+                  <div class="post-title text-slate-800 mt-3">
+                    <a
+                      href={`/${random[2].slug}`}
+                      class="font-bold text-base mb-1 line-clamp-2 dontmiss-post-3--title"
+                      >{random[2].title}</a
+                    >
+                    <div class="detail flex text-sm text-gray-400 mt-2">
+                      <div class="date-container flex gap-1">
+                        <div>
+                          <img src="" alt="" />
+                        </div>
+                        <div class="date dontmiss-post-3--creationTime">
+                          {random[2].creationTime?.substring(0, 10)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-span-6 mb-3 max-sm:col-span-12">
+                <div class="post-container relative">
+                  <a href={`/${random[3].slug}`}>
+                  <img
+                    class="w-[170px] h-[85px] object-cover dontmiss-post-4--image"
+                    src={random[3].image.url}
+                    alt={random[3].image.alt}
+                  />
+                  </a>
+                  <div class="post-title text-slate-800 mt-3">
+                    <a
+                      href={`/${random[3].slug}`}
+                      class="font-bold text-base mb-1 line-clamp-2 dontmiss-post-4--title"
+                      >{random[3].title}</a
+                    >
+                    <div class="detail flex text-sm text-gray-400 mt-2">
+                      <div class="date-container flex gap-1">
+                        <div>
+                          <img src="" alt="" />
+                        </div>
+                        <div class="date dontmiss-post-4--creationTime">
+                          {random[3].creationTime?.substring(0, 10)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Grid latest -->
+    <h2>Lo último</h2>
+    <div class="grid grid-cols-12 gap-4 mt-3">
+      <div class="col-span-8 max-md:col-span-12">
+        <div class="grid grid-cols-12 gap-4 grid-posts" set:html={veryLatest} />
+      </div>
+    </div>
+    <div class="text-center">
+      <button
+        class="btn load-more-btn mt-12 bg-blue-400 text-white px-7 py-3 rounded-md"
+        >Leer más</button
+      >
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  import { environment } from "../environment/environment";
+  import { Post } from "../models/post.model";
+  const posts: any = document.querySelector(".grid-posts");
+
+  let currentPage = 0;
+
+  const loadMoreBtn: any = document.querySelector(".load-more-btn");
+  async function loadGridLatestPosts(page: number, size: number) {
+    const response = await fetch(
+      `${environment.baseUrl}/posts-api/posts/filter?page=${page}&size=${size}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sort: "NONE",
+          direction: "DESC",
+          topics: [], // si se pasa un array vacio, significa que son todos los topics
+        }),
+      },
+    );
+    const data = await response.json();
+
+    const postsData = data.content;
+
+    if (postsData) {
+      postsData.forEach((post: Post) => {
+        // Create HTML string for post
+        const postHTML = `
+        
+         <div class="col-span-6 max-md:col-span-12">
+          <a href="/${post.slug}">
+            <div class="post-container">
+              <div class="image-container rounded-md mb-3">
+                <img class="post--image rounded-md max-w-full h-[250px] w-full object-cover" src="${post.image?.url}" alt="${post.image?.alt}" />
+                </div>
+                <a href="/${post.slug}" class="text-xl font-bold mb-3 mt-3">${post.title}</a>
+                <div class="detail flex justify-between text-gray-400 text-sm mt-2">
+                  <div>${post.topic}</div>
+                  <div>${post.creationTime?.substring(0, 10)}</div>
+                 </div>
+              </div>
+            </a>
+          </div>
+                
+                    `;
+
+        // Append postHTML to postContainer
+        posts.innerHTML += postHTML;
+      });
+    }
+    currentPage++;
+  }
+  loadMoreBtn &&
+    loadMoreBtn.addEventListener("click", () => {
+      // console.log(currentPage, 4);
+      loadGridLatestPosts(currentPage, 4);
+    });
+</script>

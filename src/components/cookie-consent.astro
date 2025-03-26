@@ -1,0 +1,279 @@
+---
+
+---
+
+<style>
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 55px;
+    height: 27px;
+  }
+
+  /* Hide default HTML checkbox */
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* The slider */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+  }
+
+  input:disabled:checked + .slider {
+    background-color: #d8dcfd;
+    cursor: default;
+  }
+
+  input:checked + .slider {
+    background-color: #2196f3;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196f3;
+  }
+
+  input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+  }
+
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
+</style>
+
+<div
+    class="cookie-consent-overlay opacity-0 scale-0 transition-all duration-300 z-20 bg-black/80 fixed bottom-0 top-0 left-0 right-0"
+>
+  <div
+      class="cookie-consent-info-container bg-white max-w-lg min-w-80 absolute z-20 left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 py-4 px-5 rounded-md"
+  >
+    <div class="logo">
+      <img src="/images/logo.png" alt="EmpleoEmprende.es" />
+    </div>
+    <div class="font-bold text-xl text-center mt-1 mb-3">
+      Cookie Policy
+    </div>
+    <hr />
+    <div class="cookies-info-container p-2 border">
+      <div
+          class="heading font-bold text-gray-700 text-center text-sm mt-1 leading-relaxed"
+      >
+        We use cookies on our website. Some of them are essential, while others help us improve this website and your experience.
+      </div>
+      <div class="text-center text-sm mt-3 leading-relaxed text-gray-700">
+        We use first-party and third-party cookies. If you accept, you agree to the use of cookies. If not, we'll only use essential cookies. You can find more information about how we use your data in our <a
+          href="https://www.empleoemprende.es/cookie-policy"
+          class="text-blue-400">cookie policy</a>
+      </div>
+    </div>
+    <div class="cookie-btn-container mt-2 text-center space-x-2">
+      <button
+          class="cookie-configure--btn px-6 py-2 mb-2 border rounded-md text-gray-600"
+      >Configure</button>
+      <button
+          class="cookie-reject-main--btn px-6 py-2 mb-2 border rounded-md text-gray-600"
+      >Reject and subscribe</button>
+      <button
+          class="cookie-accept-all--btn px-6 py-2 mb-2 border rounded-md text-white bg-blue-400"
+      >Accept</button>
+    </div>
+  </div>
+
+  <!-- Cookie selection -->
+  <div
+      class="cookie-select-container hidden bg-white max-w-lg min-w-80 absolute z-20 left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 py-4 px-5 rounded-md"
+  >
+    <div class="logo">
+      <img src="/images/logo.png" alt="EmpleoEmprende.es" />
+    </div>
+    <div class="font-bold text-xl text-center mt-1 mb-3">
+      Cookie Policy
+    </div>
+    <hr />
+    <div class="cookie-options my-2">
+      <div class="cookie-essential py-5 px-4 border rounded-md">
+        <div class="flex justify-between">
+          <div class="text-gray-500 font-semibold text-sm">
+            Strictly necessary
+          </div>
+          <div>
+            <label class="switch">
+              <input type="checkbox" checked disabled />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="cookie-essential py-5 px-4 border rounded-md mt-3">
+        <div class="flex justify-between">
+          <div class="text-gray-500 font-semibold text-sm">
+            Analytics cookies
+          </div>
+          <label class="switch">
+            <input
+                class="optional-cookie--input"
+                type="checkbox"
+                checked="false"
+            />
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+      <div class="cookie-btn-container mt-2 text-center space-x-2">
+        <button
+            class="cookie-back--btn px-6 py-2 mb-2 border rounded-md text-gray-600"
+        >Back</button>
+        <button
+            class="cookie-reject--btn px-6 py-2 mb-2 border rounded-md text-gray-600"
+        >Reject</button>
+        <button
+            class="cookie-accept-selected--btn px-6 py-2 mb-2 border rounded-md text-white bg-blue-400"
+        >Accept</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const cookieBackBtn: any = document.querySelector(".cookie-back--btn");
+  const cookieRejectBtn: any = document.querySelector(".cookie-reject--btn");
+  const cookieRejectMainBtn: any = document.querySelector(
+    ".cookie-reject-main--btn",
+  );
+  const cookieAcceptSelectedBtn: any = document.querySelector(
+    ".cookie-accept-selected--btn",
+  );
+  const cookieAcceptAllBtn: any = document.querySelector(
+    ".cookie-accept-all--btn",
+  );
+  const cookieConfigureBtn: any = document.querySelector(
+    ".cookie-configure--btn",
+  );
+  // input
+  const optionalCookieInput: any = document.querySelector(
+    ".optional-cookie--input",
+  );
+  // containers
+  const cookieSelectContainer: any = document.querySelector(
+    ".cookie-select-container",
+  );
+  const cookieInfoContainer: any = document.querySelector(
+    ".cookie-consent-info-container",
+  );
+
+  const cookieOverlay: any = document.querySelector(".cookie-consent-overlay");
+
+  //open cookie configuration\
+  cookieConfigureBtn &&
+    cookieConfigureBtn.addEventListener("click", () => {
+      cookieInfoContainer.classList.add("hidden"); //hide main container
+
+      cookieSelectContainer.classList.add("block");
+      //remove default hidden class
+      cookieSelectContainer.classList.remove("hidden");
+    });
+
+  //open cookie info / hide cookie config
+  cookieBackBtn &&
+    cookieBackBtn.addEventListener("click", () => {
+      cookieSelectContainer.classList.add("hidden");
+
+      cookieInfoContainer.classList.add("block");
+
+      cookieInfoContainer.classList.remove("hidden");
+    });
+
+  cookieRejectBtn && cookieRejectBtn.addEventListener("click", rejectCookies);
+  cookieRejectMainBtn &&
+    cookieRejectMainBtn.addEventListener("click", rejectCookies);
+  cookieAcceptAllBtn &&
+    cookieAcceptAllBtn.addEventListener("click", acceptCookies);
+  cookieAcceptSelectedBtn &&
+    cookieAcceptSelectedBtn.addEventListener("click", acceptCookies);
+  function rejectCookies() {
+    const expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() + 1);
+    localStorage.setItem("cookieConsent", "true");
+    localStorage.setItem("cookieConsentExpiry", expiryDate.toISOString());
+    localStorage.setItem("googleAnalyticsConsent", "false");
+    cookieOverlay.remove();
+  }
+
+  function acceptCookies() {
+    const expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() + 1);
+    localStorage.setItem("cookieConsent", "true");
+    localStorage.setItem("cookieConsentExpiry", expiryDate.toISOString());
+    
+    localStorage.setItem(
+      "googleAnalyticsConsent",
+      String(optionalCookieInput.checked),
+    );
+    cookieOverlay.remove();
+    window.location.reload();
+  }
+
+  function openCookieDialog() {
+    const cookieConsent = localStorage.getItem("cookieConsent");
+    const expiryDate = localStorage.getItem("cookieConsentExpiry");
+
+    if (cookieConsent) {
+        // Verificar si ha expirado
+        if (expiryDate) {
+            const currentDate = new Date();
+            const expiry = new Date(expiryDate);
+            
+            if (currentDate > expiry) {
+                // Ha expirado, limpiar localStorage y mostrar diálogo
+                localStorage.removeItem("cookieConsent");
+                localStorage.removeItem("cookieConsentExpiry");
+                localStorage.removeItem("googleAnalyticsConsent");
+                cookieOverlay.classList.remove("opacity-0");
+                cookieOverlay.classList.remove("scale-0");
+            }
+        }
+    } else {
+        cookieOverlay.classList.remove("opacity-0");
+        cookieOverlay.classList.remove("scale-0");
+    }
+  }
+
+  setTimeout(() => {
+    openCookieDialog();
+    fetch("https://www.googletagmanager.com/gtag/js?id=G-5DN7RYCK15")
+      .then()
+      .then((res) => {
+        console.log(res);
+      });
+  }, 1000);
+</script>
