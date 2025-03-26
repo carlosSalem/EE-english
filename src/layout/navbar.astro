@@ -24,6 +24,32 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
   }
+
+  /* New dropdown styles */
+  .language-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  .language-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+  .language-dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  .language-dropdown-content a:hover {
+    background-color: #f1f1f1;
+  }
+  .language-dropdown:hover .language-dropdown-content {
+    display: block;
+  }
 </style>
 
 <div class="logo container max-w-6xl mx-auto py-8 px-4">
@@ -58,6 +84,13 @@
     <a class="px-3 py-1 border-l border-gray-200/30" href="/topic?name=Noticias"
     >News</a
     >
+    <!-- New Language Dropdown -->
+    <div class="language-dropdown px-3 py-1 border-l border-gray-200/30">
+      <span>Language</span>
+      <div class="language-dropdown-content">
+        <a href="https://www.empleoemprende.es/">Spanish</a>
+      </div>
+    </div>
   </div>
   <!-- sm nav -->
   <button
@@ -98,6 +131,13 @@
     <a class="py-1.5 border-b border-gray-200/30" href="/topic?name=Noticias"
     >News</a
     >
+    <!-- Mobile Language Dropdown -->
+    <div class="language-dropdown py-1.5 border-b border-gray-200/30">
+      <span>Language</span>
+      <div class="language-dropdown-content">
+        <a href="https://www.empleoemprende.es/">Spanish</a>
+      </div>
+    </div>
   </div>
 </div>
 
